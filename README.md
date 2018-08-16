@@ -45,10 +45,12 @@
 	# 使用
 	
 	## android:
+	![android01](https://raw.githubusercontent.com/NikiLee2016/react-native-bounce-flatlist/master/imageRes/capture/android-screen-shot-01.jpg)	![android01](https://raw.githubusercontent.com/NikiLee2016/react-native-bounce-flatlist/master/imageRes/capture/android-screen-shot-02.png)
 	
-	`可以看到android端的弹性效果`
+	`下拉可以看到android端的弹性效果`
 	
 	## IOS: 
+	![android01](https://raw.githubusercontent.com/NikiLee2016/react-native-bounce-flatlist/master/imageRes/capture/ios-screen-shot-01.png)  ![android01](https://raw.githubusercontent.com/NikiLee2016/react-native-bounce-flatlist/master/imageRes/capture/ios-screen-shot-02.png)
 		
 	```
 	由于在尝试集成react-native-mjrefresh组件的时候出了一些问题, IOS端刷新组件仍然使用的原生RefreshControl, 效果有些差, 不过我已联系作者, 后续会解决
@@ -105,9 +107,9 @@
 
 # 感谢
 
-再次感谢两位开源作者@2534290808和@gameboyVito. 
-如果这个组件对你有帮助, 请不要吝啬你的start~
-由于本人水平有限, 这也是本人正式发布的第一个开源项目, 所以组件在使用中难免有bug或者不尽如人意的地方, 届时非常欢迎大家PR!
+再次感谢两位开源作者@2534290808和@gameboyVito<br/>. 
+如果这个组件对你有帮助, 请不要吝啬你的start~<br/>
+由于本人水平有限, 这也是本人正式发布的第一个开源项目, 所以组件在使用中难免有bug或者不尽如人意之处, 届时非常欢迎大家PR!<br/>
 谢谢!
 
 
