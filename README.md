@@ -19,6 +19,7 @@
 	include ':react-native-smartrefreshlayout', ':reactNativePicker'
 	project(':react-native-smartrefreshlayout').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-smartrefreshlayout/android')
    ```
+   
 - 打开 **android/app/build.gradle**, 添加
 	
 	```
@@ -41,15 +42,17 @@
 	}
 	```
 	
-# 使用
-
-	### android:
+	# 使用
+	
+	## android:
 	
 	`可以看到android端的弹性效果`
 	
-	### IOS: 
-	
-	`由于在尝试集成react-native-mjrefresh组件的时候出了一些问题, IOS端刷新组件仍然使用的原生RefreshControl, 效果有些差, 不过我已联系作者, 后续会解决`
+	## IOS: 
+		
+	```
+	由于在尝试集成react-native-mjrefresh组件的时候出了一些问题, IOS端刷新组件仍然使用的原生RefreshControl, 效果有些差, 不过我已联系作者, 后续会解决
+	```
 	
 	## example
 	
