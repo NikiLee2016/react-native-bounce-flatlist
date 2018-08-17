@@ -11,7 +11,11 @@
     "url": "git+https://github.com/NikiLee2016/react-native-bounce-flatlist.git"
   },
   "keywords": [
-    "react-native", "android", "ios", "boucne", "flatlist"
+    "react-native",
+    "android",
+    "ios",
+    "boucne",
+    "flatlist"
   ],
   "author": "Niki",
   "license": "ISC",
@@ -20,11 +24,10 @@
   },
   "homepage": "https://github.com/NikiLee2016/react-native-bounce-flatlist#readme",
   "dependencies": {
-    "prop-types": "^15.5.10",
-    "react-native-smartrefreshlayout": "^0.5.7",
-    "react-native-ultimate-listview": "3.3.0",
     "loadsh": "^1.0.1",
-    "react-native-loader": "^1.2.1"
-
+    "prop-types": "^15.5.10",
+    "react-native-loader": "^1.2.1",
+    "react-native-smartrefreshlayout": "^0.5.7",
+    "react-native-ultimate-listview": "3.3.0"
   }
 }
