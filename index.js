@@ -3,4 +3,4 @@
  * Email: m13296644326@163.com
  */
 
-export {default as BounceFlatList} from './src/MyFlatList';
+export {default as BounceFlatList} from './src/MyFlatList';  
