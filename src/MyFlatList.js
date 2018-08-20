@@ -145,7 +145,7 @@ export default class MyFlatList extends React.Component {
                 //这样可以不需要再data里面指定key
                 keyExtractor={(item, index) => index}
                 //refreshableMode="advanced" //basic or advanced
-                refreshableMode={isIos ? 'advanced' : 'basic'} //basic or advanced
+                refreshableMode={'basic'} //basic or advanced
                 refreshable={true}
                 //onEndReachedThreshold={30}
                 displayDate={false}

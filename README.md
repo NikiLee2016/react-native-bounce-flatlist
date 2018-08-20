@@ -1,6 +1,6 @@
 # react-native-bounce-flatlist
 本插件的FlatList封装基于[react-native-ultimate-listview](https://github.com/gameboyVito/react-native-ultimate-listview), 弹簧效果实现基于[react-native-smartrefreshlayout](https://github.com/react-native-studio/react-native-SmartRefreshLayout/blob/master/README.md), 首先对二位开源作者表示感谢.
-很大程度上, 我仅仅做了一个解决方案的整合. 希望能对大家有所帮助!
+<br/>很大程度上, 我仅仅做了一个解决方案的整合. 希望能对大家有所帮助!
 
 # Installation
 
@@ -45,14 +45,16 @@
 	# 使用
 	
 	## android:
-	![android01](https://raw.githubusercontent.com/NikiLee2016/react-native-bounce-flatlist/master/imageRes/capture/screen-shot01.jpg)	![android01](https://raw.githubusercontent.com/NikiLee2016/react-native-bounce-flatlist/master/imageRes/capture/screen-shot02.jpg)
+	![android01](https://github.com/NikiLee2016/react-native-bounce-flatlist/blob/master/src/imageRes/capture/screen-shot01.jpg?raw=true)	![android01](https://github.com/NikiLee2016/react-native-bounce-flatlist/blob/master/src/imageRes/capture/screen-shot02.jpg?raw=true)
 	
 	`下拉可以看到android端的弹性效果`
-	  
+	
 	## IOS: 
-	![android01](https://raw.githubusercontent.com/NikiLee2016/react-native-bounce-flatlist/master/imageRes/capture/screen-shot03.jpg)  ![android01](https://raw.githubusercontent.com/NikiLee2016/react-native-bounce-flatlist/master/imageRes/capture/screen-shot04.jpg)
-		 
-	`由于在尝试集成react-native-mjrefresh组件的时候出了一些问题, IOS端刷新组件仍然使用的原生RefreshControl, 效果有些差, 不过我已联系作者, 后续会解决`
+	![android01](https://github.com/NikiLee2016/react-native-bounce-flatlist/blob/master/src/imageRes/capture/screen-shot03.jpg?raw=true)  ![android01](https://github.com/NikiLee2016/react-native-bounce-flatlist/blob/master/src/imageRes/capture/screen-shot04.jpg?raw=true)
+		
+	```
+	由于在尝试集成react-native-mjrefresh组件的时候出了一些问题, IOS端刷新组件仍然使用的原生RefreshControl, 效果有些差, 不过我已联系作者, 后续会解决
+	```
 	
 	## example
 	
