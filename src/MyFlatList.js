@@ -104,7 +104,8 @@ export default class MyFlatList extends React.Component {
         endViewBackgroundColor: '#0000',
         pageSize: 20,
         showAllLoadViewLimit: 5,
-        height: screenHeight - 44,
+        //默认是屏幕高度 - 88
+        height: screenHeight - 44 - 44,
         width: screenWidth,
     };
 
