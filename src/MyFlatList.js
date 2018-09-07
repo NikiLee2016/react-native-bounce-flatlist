@@ -5,7 +5,7 @@
 import React from 'react';
 import {Platform, RefreshControl, ScrollView, View, StyleSheet, Dimensions} from 'react-native';
 
-import {UltimateListView} from "react-native-ultimate-listview";
+import {UltimateListView} from "rn-ultimate-listview";
 import {EmptyDataView, NetworkError} from "./view/ErrorView";
 import PropTypes from "prop-types";
 import TextBetweenLines from "./view/TextBetweenLines";
@@ -22,7 +22,7 @@ const isIos = Platform.OS === 'ios';
 const REQUEST_STATE_LOADING_FIRST_PAGE = -3;
 const REQUEST_STATE_EMPTY_DATA = -2;
 const REQUEST_STATE_NETWORK_ERROR = -1;
-
+const arrow_down = require('./imageRes/arrow_down.png');
 export default class MyFlatList extends React.Component {
 
     static propTypes = {
@@ -34,6 +34,10 @@ export default class MyFlatList extends React.Component {
          * 指定默认网络错误视图中, 图片距离文字的间距
          */
         netWorkErrorMarginTop: PropTypes.number,
+        /**
+         * 指定空数据视图中, 图片距离文字的间距
+         */
+        emptyDataMarginTop: PropTypes.number,
         /**
          * 加载数据的核心回调方法, 参数: page: 当前页码(注意从1开始);
          * startFetch: 请求数据成功(参数data: 请求到的数据数据); abortFetch: 请求数据失败.
@@ -87,7 +91,7 @@ export default class MyFlatList extends React.Component {
          */
         customNetworkView: PropTypes.func,
         /**
-         * 自定义空视图回调; 参数: retry: 重新请求数据回调
+         * 自定义空视图回调; 参数: retry: 重新请求数据回调; emptyDataMarginTop: 用户指定的文字距图片margin
          */
         customEmptyDataView: PropTypes.func,
         /**
@@ -98,6 +102,10 @@ export default class MyFlatList extends React.Component {
          * 自定义刷新列表时header的样式, 具体如何定义可以参照 react-native-smartrefreshlayout开发文档
          */
         customRefreshingHeader: PropTypes.func,
+        /**
+         * 自定义分页加载时布局, 建议高度为50
+         */
+        customPagingView: PropTypes.func,
     };
 
     static defaultProps = {
@@ -107,6 +115,7 @@ export default class MyFlatList extends React.Component {
         //默认是屏幕高度 - 88
         height: screenHeight - 44 - 44,
         width: screenWidth,
+        emptyDataMarginTop: 90.
     };
 
     constructor(p) {
@@ -139,7 +148,7 @@ export default class MyFlatList extends React.Component {
     _getListView = () => {
         let listProps = _.omit(this.props, 'style');
         let {renderItem, renderHeader, renderSeparator} = listProps;
-        return (<View style={this.props.style}>
+        return (<View style={[{flex: 1}, this.props.style]}>
             <UltimateListView
                 customRefreshControl={this._getRefreshControl}
                 ref={(ref) => this.ultimate = ref}
@@ -150,8 +159,11 @@ export default class MyFlatList extends React.Component {
                 refreshable={true}
                 //onEndReachedThreshold={30}
                 displayDate={false}
-                customRefreshViewHeight={200}
 
+                arrowImageSource={arrow_down}
+                arrowImageStyle={{width: 30, height: 30}}
+
+                customRefreshViewHeight={200}
                 paginationAllLoadedView={this._getAllLoadedView}
                 paginationFetchingView={() => null}
                 {...listProps}
@@ -164,6 +176,7 @@ export default class MyFlatList extends React.Component {
                 refreshableTitleRelease="释放加载"
                 refreshableTitleRefreshing="拼命加载中..."
                 waitingSpinnerText="拼命加载中..."
+                paginationWaitingView={this.props.customPagingView}
             />
             {this._getLoadingView()}
         </View>);
@@ -199,11 +212,11 @@ export default class MyFlatList extends React.Component {
     };
 
     _getEmptyDataView = () => {
-        let {customEmptyDataView, defaultEmptyDataDes} = this.props;
+        let {customEmptyDataView, defaultEmptyDataDes, emptyDataMarginTop} = this.props;
         if (customEmptyDataView) {
-            return customEmptyDataView(this.refresh);
+            return customEmptyDataView(this.refresh, defaultEmptyDataDes, emptyDataMarginTop);
         }
-        return (<EmptyDataView text={defaultEmptyDataDes} marginTop={90} source={Images.empty_data}/>);
+        return (<EmptyDataView text={defaultEmptyDataDes} marginTop={emptyDataMarginTop} source={Images.empty_data}/>);
     };
 
     _getNetworkErrorView = () => {
