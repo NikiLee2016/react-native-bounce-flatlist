@@ -238,11 +238,12 @@ export default class MyFlatList extends React.Component {
         this.ultimate && this.ultimate.scrollToOffset(params);
     };
 
-    /**
-     * 暴露方法: 刷新数据
-     */
-    refresh = () => {
 
+    /**
+     * 暴露方法, 刷新列表数据
+     * @param showLoader 刷新时是否显示loader, 默认不显示
+     */
+    refresh = (showLoader) => {
         this.setState({isRefreshingIOS: true});
         try {
             //this.ultimate.scrollToIndex({viewPosition: 0, index: 0});
@@ -250,8 +251,8 @@ export default class MyFlatList extends React.Component {
         } catch (err) {
         }
         let {isEmpty, netWorkError} = this.state;
-        //如果之前是空数据或者网络请求错误状态, 那么将this.page设为 REQUEST_STATE_LOADING_FIRST_PAGE, 加载时显示loadingView
-        if (isEmpty || netWorkError) {
+        //如果之前是空数据,网络请求错误状态或者要求显示loader, 那么将this.page设为 REQUEST_STATE_LOADING_FIRST_PAGE, 加载时显示loadingView
+        if (isEmpty || netWorkError || showLoader) {
             this.page = REQUEST_STATE_LOADING_FIRST_PAGE;
         }
         this.setState({
