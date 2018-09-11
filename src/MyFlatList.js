@@ -124,11 +124,13 @@ export default class MyFlatList extends React.Component {
         this.page = REQUEST_STATE_LOADING_FIRST_PAGE;
         //此次请求到的数据size
         this.currentDataSize = 0;
+        this.headerHeight = 0;
         this.state = {
             isEmpty: false,//
             netWorkError: false,
             isRefreshingIOS: false,
         };
+
     }
 
     render() {
@@ -147,7 +149,7 @@ export default class MyFlatList extends React.Component {
 
     _getListView = () => {
         let listProps = _.omit(this.props, 'style');
-        let {renderItem, renderHeader, renderSeparator} = listProps;
+        let {renderItem, renderSeparator} = listProps;
         return (<View style={[{flex: 1}, this.props.style]}>
             <UltimateListView
                 customRefreshControl={this._getRefreshControl}
@@ -168,7 +170,7 @@ export default class MyFlatList extends React.Component {
                 paginationFetchingView={() => null}
                 {...listProps}
                 item={renderItem}
-                header={renderHeader}
+                header={this._renderHeader}
                 separator={renderSeparator}
                 //emptyView={this.getEmptyView}
                 onFetch={this._onDataFetch}
@@ -182,16 +184,30 @@ export default class MyFlatList extends React.Component {
         </View>);
     };
 
+    _renderHeader = () => {
+        const {renderHeader} = this.props;
+        if (!renderHeader){
+            return null;
+        }
+        return (<View
+            onLayout={(event) => this.headerHeight = event.nativeEvent.layout.height}
+        >
+            {renderHeader()}
+        </View>)
+    };
+
     _getLoadingView = () => {
         if (this.page !== REQUEST_STATE_LOADING_FIRST_PAGE) {
             return null;
         }
         let {height, width, customLoadingView} = this.props;
+        const topProp = this.headerHeight === 0 ? {} : {top: this.headerHeight};
         return (<View style={{
             backgroundColor: '#f5f5f5',
             height: screenHeight,
             position: 'absolute',
             width,
+            ...topProp,
         }}>
             <View style={{justifyContent: 'center', alignItems: 'center', height}}>
                 {customLoadingView ? customLoadingView() : (<LoadingView/>)}
