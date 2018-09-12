@@ -179,6 +179,7 @@ export default class MyFlatList extends React.Component {
                 refreshableTitleRefreshing="拼命加载中..."
                 waitingSpinnerText="拼命加载中..."
                 paginationWaitingView={this.props.customPagingView}
+
             />
             {this._getLoadingView()}
         </View>);
@@ -258,12 +259,12 @@ export default class MyFlatList extends React.Component {
     /**
      * 暴露方法, 刷新列表数据
      * @param showLoader 刷新时是否显示loader, 默认不显示
+     * @param scrollToTop 刷新之后是否滚动到顶部, 默认true
      */
-    refresh = (showLoader) => {
+    refresh = (showLoader, scrollToTop = true) => {
         this.setState({isRefreshingIOS: true});
         try {
-            //this.ultimate.scrollToIndex({viewPosition: 0, index: 0});
-            this.scrollToOffset({y: 0, animate: true});
+            scrollToTop && this.scrollToOffset({y: 0, animate: true});
         } catch (err) {
         }
         let {isEmpty, netWorkError} = this.state;
