@@ -3,17 +3,18 @@
  * Email: m13296644326@163.com
  */
 import React from 'react';
-import {Platform, RefreshControl, ScrollView, View, StyleSheet, Dimensions} from 'react-native';
+import {Platform, RefreshControl, View, StyleSheet, Dimensions, ScrollView} from 'react-native';
 
 import {UltimateListView} from "rn-ultimate-listview";
 import {EmptyDataView, NetworkError} from "./view/ErrorView";
 import PropTypes from "prop-types";
 import TextBetweenLines from "./view/TextBetweenLines";
-import {SmartRefreshControl, ClassicsHeader, StoreHouseHeader, DefaultHeader} from 'react-native-smartrefreshlayout';
+// import {SmartRefreshControl, ClassicsHeader, StoreHouseHeader, DefaultHeader} from 'react-native-smartrefreshlayout';
 import ArrayUtils from "./util/ArrayUtils";
 import LoadingView from "./view/LoadingView";
-import * as _ from "loadsh";
+import * as _ from "lodash";
 import Images from "./Images";
+import RefreshControlAndroid from "./RefreshControlAndroid";
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -106,6 +107,26 @@ export default class MyFlatList extends React.Component {
          * 自定义分页加载时布局, 建议高度为50
          */
         customPagingView: PropTypes.func,
+        /**
+         * 自定义ios端刷新布局
+         */
+        renderScrollComponent: PropTypes.func,
+        /**
+         * 刷新组建下拉位移回调, 参数: event, 通过event.nativeEvent.percent可获取下拉位移百分比
+         */
+        onRefreshControlMoving: PropTypes.func,
+        /**
+         * 刷新组建高度
+         */
+        refreshControlHeight: PropTypes.number,
+        /**
+         * 刷新回调
+         */
+        onRefresh: PropTypes.func,
+        /**
+         * 刷新完成回调
+         */
+        onRefreshFinish: PropTypes.func,
     };
 
     static defaultProps = {
@@ -115,7 +136,7 @@ export default class MyFlatList extends React.Component {
         //默认是屏幕高度 - 88
         height: screenHeight - 44 - 44,
         width: screenWidth,
-        emptyDataMarginTop: 90.
+        emptyDataMarginTop: 90
     };
 
     constructor(p) {
@@ -179,7 +200,7 @@ export default class MyFlatList extends React.Component {
                 refreshableTitleRefreshing="拼命加载中..."
                 waitingSpinnerText="拼命加载中..."
                 paginationWaitingView={this.props.customPagingView}
-
+                //renderScrollComponent={this._renderScrollComponent}
             />
             {this._getLoadingView()}
         </View>);
@@ -187,7 +208,7 @@ export default class MyFlatList extends React.Component {
 
     _renderHeader = () => {
         const {renderHeader} = this.props;
-        if (!renderHeader){
+        if (!renderHeader) {
             return null;
         }
         return (<View
@@ -310,7 +331,7 @@ export default class MyFlatList extends React.Component {
             });
         }
         else {
-            this.currentDataSize = data.length;
+            this.currentDataSize = data ? data.length : 0;
             this.startFetch(data, this.props.pageSize);
         }
     };
@@ -339,7 +360,48 @@ export default class MyFlatList extends React.Component {
      * @private
      */
     _stopSmartRefresh = () => {
-        !isIos && this.refreshControl && this.refreshControl.finishRefresh();
+        this.refreshControl && this.refreshControl.finishRefresh();
+        this.refreshControlIOS && this.refreshControlIOS.finishRefresh();
+        //出发刷新完成的回调
+        this.props.onRefreshFinish && this.props.onRefreshFinish();
+    };
+
+    _renderScrollComponent = (props) => {
+        const {customRefreshingHeader} = this.props;
+        if (isIos) {
+            if (!customRefreshingHeader){
+                return null;
+            }
+            return (<ScrollView
+                style={{flex:1}}
+                refreshControl={this._getRefreshControlIOS()}
+                {...props}
+            />)
+        }
+    };
+
+    _getRefreshControlIOS = () => {
+        /*let {customRefreshingHeader, onRefreshControlMoving, onRefresh} = this.props;
+        return (<RefreshControlIOS
+            ref={ref => this.refreshControlIOS = ref}
+            isRefreshingIOS={this.state.isRefreshingIOS}
+            onRefresh={() => {
+                onRefresh && onRefresh();
+                this.refresh();
+            }
+            }
+            customHeaderComponent={customRefreshingHeader}
+            onHeaderMoving={onRefreshControlMoving}
+        />);*/
+        return (<RefreshControl
+            refreshing={this.state.isRefreshingIOS}
+            onRefresh={this.refresh}
+            tintColor="#666666"
+            title="刷新数据"
+            titleColor="#666666"
+            colors={['#666666']}
+            progressBackgroundColor="#ffffff"
+        />)
     };
 
     /**
@@ -348,23 +410,20 @@ export default class MyFlatList extends React.Component {
      * @private
      */
     _getRefreshControl = () => {
+        let {customRefreshingHeader, onRefreshControlMoving, refreshControlHeight, onRefresh} = this.props;
         if (isIos) {
-            return (<RefreshControl
-                refreshing={this.state.isRefreshingIOS}
-                onRefresh={this.refresh}
-                tintColor="#666666"
-                title="刷新数据"
-                titleColor="#666666"
-                colors={['#666666']}
-                progressBackgroundColor="#ffffff"
-            />);
+            return this._getRefreshControlIOS();
         }
-        let {customRefreshingHeader} = this.props;
-        return (<SmartRefreshControl
-            //finishRefresh
+        return (<RefreshControlAndroid
+            onHeaderMoving={onRefreshControlMoving}
+            headerHeight={refreshControlHeight}
             ref={ref => this.refreshControl = ref}
-            onRefresh={this.refresh}
-            HeaderComponent={customRefreshingHeader ? customRefreshingHeader() : (<DefaultHeader/>)}/>)
+            customHeaderComponent={customRefreshingHeader}
+            onRefresh={() => {
+                onRefresh && onRefresh();
+                this.refresh();
+            }
+            }/>);
     };
 
     /**
