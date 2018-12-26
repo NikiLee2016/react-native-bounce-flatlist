@@ -3,7 +3,7 @@
  * Email: m13296644326@163.com
  */
 import React from 'react';
-import {Platform, RefreshControl, View, StyleSheet, Dimensions, ScrollView} from 'react-native';
+import {Dimensions, Platform, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
 
 import {UltimateListView} from "rn-ultimate-listview";
 import {EmptyDataView, NetworkError} from "./view/ErrorView";
@@ -56,6 +56,10 @@ export default class MyFlatList extends React.Component {
          * 滑动监听, 参数为event, 通过event.nativeEvent.contentOffset.y, 可以拿到y方向上的偏移量
          */
         onScroll: PropTypes.func,
+        /**
+         * 是否支持下拉刷新. 默认为true
+         */
+        refreshable: PropTypes.bool,
         /**
          * 分割线, 返回分割线布局
          */
@@ -136,7 +140,8 @@ export default class MyFlatList extends React.Component {
         //默认是屏幕高度 - 88
         height: screenHeight - 44 - 44,
         width: screenWidth,
-        emptyDataMarginTop: 90
+        emptyDataMarginTop: 90,
+        refreshable: true,
     };
 
     constructor(p) {
@@ -170,7 +175,7 @@ export default class MyFlatList extends React.Component {
 
     _getListView = () => {
         let listProps = _.omit(this.props, 'style');
-        let {renderItem, renderSeparator} = listProps;
+        let {renderItem, renderSeparator, refreshable, renderScrollComponent} = listProps;
         return (<View style={[{flex: 1}, this.props.style]}>
             <UltimateListView
                 customRefreshControl={this._getRefreshControl}
@@ -179,10 +184,9 @@ export default class MyFlatList extends React.Component {
                 keyExtractor={(item, index) => index}
                 //refreshableMode="advanced" //basic or advanced
                 refreshableMode={isIos ? 'advanced' : 'basic'} //basic or advanced
-                refreshable={true}
+                refreshable={refreshable}
                 //onEndReachedThreshold={30}
                 displayDate={false}
-
                 arrowImageSource={arrow_down}
                 arrowImageStyle={{width: 30, height: 30}}
 
@@ -200,6 +204,7 @@ export default class MyFlatList extends React.Component {
                 refreshableTitleRefreshing="拼命加载中..."
                 waitingSpinnerText="拼命加载中..."
                 paginationWaitingView={this.props.customPagingView}
+                renderScrollComponent={this._renderScrollComponentIOS}
                 //renderScrollComponent={this._renderScrollComponent}
             />
             {this._getLoadingView()}
@@ -300,6 +305,25 @@ export default class MyFlatList extends React.Component {
     };
 
     /**
+     * 获取列表的数据集合
+     * @returns {null} 数据源
+     */
+    getDataList = () => {
+        if (this.ultimate) {
+            return this.ultimate.getRows();
+        }
+        return null;
+    };
+
+    /**
+     * 根据数据源静态刷新列表, 不会请求网络
+     * @param rows: 数据源
+     */
+    updateDataList = (rows) => {
+        this.ultimate && this.ultimate.updateDataSource(rows);
+    };
+
+    /**
      * 开始请求数据
      * @param page 当前页码, 注意是从1开始的
      * @param startFetch 开始请求回调
@@ -361,38 +385,20 @@ export default class MyFlatList extends React.Component {
      */
     _stopSmartRefresh = () => {
         this.refreshControl && this.refreshControl.finishRefresh();
-        this.refreshControlIOS && this.refreshControlIOS.finishRefresh();
+        //this.refreshControlIOS && this.refreshControlIOS.finishRefresh();
         //出发刷新完成的回调
         this.props.onRefreshFinish && this.props.onRefreshFinish();
     };
 
-    _renderScrollComponent = (props) => {
-        const {customRefreshingHeader} = this.props;
-        if (isIos) {
-            if (!customRefreshingHeader){
-                return null;
-            }
-            return (<ScrollView
-                style={{flex:1}}
-                refreshControl={this._getRefreshControlIOS()}
-                {...props}
-            />)
+    _renderScrollComponentIOS = (props) => {
+        const {renderScrollComponent} = this.props;
+        if (!renderScrollComponent) {
+            return null;
         }
+        return renderScrollComponent(props, this.refresh);
     };
 
     _getRefreshControlIOS = () => {
-        /*let {customRefreshingHeader, onRefreshControlMoving, onRefresh} = this.props;
-        return (<RefreshControlIOS
-            ref={ref => this.refreshControlIOS = ref}
-            isRefreshingIOS={this.state.isRefreshingIOS}
-            onRefresh={() => {
-                onRefresh && onRefresh();
-                this.refresh();
-            }
-            }
-            customHeaderComponent={customRefreshingHeader}
-            onHeaderMoving={onRefreshControlMoving}
-        />);*/
         return (<RefreshControl
             refreshing={this.state.isRefreshingIOS}
             onRefresh={this.refresh}
