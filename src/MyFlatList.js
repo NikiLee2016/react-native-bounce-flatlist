@@ -204,11 +204,21 @@ export default class MyFlatList extends React.Component {
                 refreshableTitleRefreshing="拼命加载中..."
                 waitingSpinnerText="拼命加载中..."
                 paginationWaitingView={this.props.customPagingView}
-                renderScrollComponent={this._renderScrollComponentIOS}
+                {...this._getRenderScrollComponentProps()}
                 //renderScrollComponent={this._renderScrollComponent}
             />
             {this._getLoadingView()}
         </View>);
+    };
+
+    _getRenderScrollComponentProps = () => {
+        const {renderScrollComponent} = this.props;
+        if (!renderScrollComponent) {
+            return {};
+        }
+        return {
+            renderScrollComponent: (props) => renderScrollComponent(props, this.refresh),
+        };
     };
 
     _renderHeader = () => {
@@ -388,14 +398,6 @@ export default class MyFlatList extends React.Component {
         //this.refreshControlIOS && this.refreshControlIOS.finishRefresh();
         //出发刷新完成的回调
         this.props.onRefreshFinish && this.props.onRefreshFinish();
-    };
-
-    _renderScrollComponentIOS = (props) => {
-        const {renderScrollComponent} = this.props;
-        if (!renderScrollComponent) {
-            return null;
-        }
-        return renderScrollComponent(props, this.refresh);
     };
 
     _getRefreshControlIOS = () => {
