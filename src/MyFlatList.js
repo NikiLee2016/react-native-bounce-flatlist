@@ -311,7 +311,13 @@ export default class MyFlatList extends React.Component {
         this.setState({
             isEmpty: false,
             netWorkError: false,
-        }, () => this.ultimate && this.ultimate.refresh());
+        }, () => {
+            if (scrollToTop){
+                this.ultimate && this.ultimate.refreshAdvanced()
+            }else {
+                this.ultimate && this.ultimate.refresh()
+            }
+        });
     };
 
     /**
