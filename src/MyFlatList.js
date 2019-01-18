@@ -161,8 +161,11 @@ export default class MyFlatList extends React.Component {
 
     render() {
         if (this.state.isEmpty || this.state.netWorkError) {
+            this.ultimate = null;
             return (
                 <ScrollView
+                    {... this.props}
+                    ref={r => this.emptyScrollView = r}
                     refreshControl={this._getRefreshControl()}
                     style={[{flex: 1}, this.props.style]}>
                     {this.props.renderHeader && this.props.renderHeader()}
@@ -170,6 +173,7 @@ export default class MyFlatList extends React.Component {
                 </ScrollView>
             );
         }
+        this.emptyScrollView = null;
         return this._getListView();
     }
 
@@ -181,7 +185,7 @@ export default class MyFlatList extends React.Component {
                 customRefreshControl={this._getRefreshControl}
                 ref={(ref) => this.ultimate = ref}
                 //这样可以不需要再data里面指定key
-                keyExtractor={(item, index) => index}
+                keyExtractor={(item, index) => index + ''}
                 //refreshableMode="advanced" //basic or advanced
                 refreshableMode={isIos ? 'advanced' : 'basic'} //basic or advanced
                 refreshable={refreshable}
@@ -289,6 +293,7 @@ export default class MyFlatList extends React.Component {
      */
     scrollToOffset = (params) => {
         this.ultimate && this.ultimate.scrollToOffset(params);
+        this.emptyScrollView && this.emptyScrollView.scrollTo({x: 0, y: params.offset, animated: params.animated});
     };
 
 
@@ -312,9 +317,9 @@ export default class MyFlatList extends React.Component {
             isEmpty: false,
             netWorkError: false,
         }, () => {
-            if (scrollToTop){
+            if (scrollToTop) {
                 this.ultimate && this.ultimate.refreshAdvanced()
-            }else {
+            } else {
                 this.ultimate && this.ultimate.refresh()
             }
         });
@@ -336,7 +341,11 @@ export default class MyFlatList extends React.Component {
      * @param rows: 数据源
      */
     updateDataList = (rows) => {
+        // TODO: 如果数据位空, 显示空布局
         this.ultimate && this.ultimate.updateDataSource(rows);
+        if (!ArrayUtils.isNotEmptyArray(rows)){
+            this._displayEmptyView();
+        }
     };
 
     /**
@@ -363,17 +372,22 @@ export default class MyFlatList extends React.Component {
         this._stopSmartRefresh();
         this.setState({isRefreshingIOS: false});
         if (!ArrayUtils.isNotEmptyArray(data) && this.page === 1) {
-            this.currentDataSize = 0;
-            this.page = REQUEST_STATE_EMPTY_DATA;
-            this.setState({
-                isEmpty: true,
-                netWorkError: false,
-            });
+            this._displayEmptyView();
         }
         else {
             this.currentDataSize = data ? data.length : 0;
             this.startFetch(data, this.props.pageSize);
         }
+    };
+
+    _displayEmptyView = () => {
+        this.page = 1;
+        this.currentDataSize = 0;
+        this.page = REQUEST_STATE_EMPTY_DATA;
+        this.setState({
+            isEmpty: true,
+            netWorkError: false,
+        });
     };
 
     /**

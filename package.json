@@ -1,6 +1,6 @@
 {
   "name": "react-native-bounce-flatlist",
-  "version": "1.3.9",
+  "version": "1.4.2",
   "description": "基于FlatList封装的Bounce-FlatList, 支持下拉刷新, 分页加载等等常规特性, 特点在于android端也有弹簧效果.",
   "main": "index.js",
   "scripts": {
