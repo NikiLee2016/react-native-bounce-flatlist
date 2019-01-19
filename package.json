@@ -27,7 +27,7 @@
     "lodash": "^4.17.11",
     "prop-types": "^15.5.10",
     "react-native-loader": "^1.2.1",
-    "react-native-smartrefreshlayout": "^0.6.3",
+    "react-native-smartrefreshlayout": "https://github.com/NikiLee2016/react-native-SmartRefreshLayout.git",
     "rn-ultimate-listview": "^1.0.5"
   }
 }

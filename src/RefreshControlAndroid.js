@@ -10,10 +10,11 @@ import {
     StyleSheet,
     Image,
     Dimensions,
-    Platform
+    Platform,
 } from 'react-native';
 import PropTypes from "prop-types";
-import {SmartRefreshControl, AnyHeader, DefaultHeader} from 'react-native-smartrefreshlayout';
+import {SmartRefreshControl, AnyHeader, DefaultHeader} from "react-native-SmartRefreshLayout";
+// import {SmartRefreshControl, AnyHeader, DefaultHeader} from 'react-native-smartrefreshlayout';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -50,11 +51,14 @@ export default class RefreshControlAndroid extends React.PureComponent {
                 children={children}
                 onRefresh={onRefresh}
                 headerHeight={headerHeight}
-                HeaderComponent={
+                renderHeader={() => {
+                    return customHeaderComponent ? customHeaderComponent() : (<DefaultHeader />)
+                }}
+                /*HeaderComponent={
                     customHeaderComponent ? (<AnyHeader>
                         {customHeaderComponent()}
                     </AnyHeader>) : (<DefaultHeader />)
-                }
+                }*/
             />
         )
     }
