@@ -14,7 +14,6 @@ import {
     Platform
 } from 'react-native';
 import PropTypes from "prop-types";
-import { Bubbles, DoubleBounce, Bars, Pulse } from 'react-native-loader';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -28,7 +27,7 @@ export default class LoadingView extends React.PureComponent {
 
     render() {
         return (
-            <DoubleBounce size={20} color={'#ff9d02'} />
+            <Text style={{}}>{'loading...'}</Text>
         )
     }
 

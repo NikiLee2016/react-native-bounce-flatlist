@@ -23,6 +23,7 @@ const isIos = Platform.OS === 'ios';
 const REQUEST_STATE_LOADING_FIRST_PAGE = -3;
 const REQUEST_STATE_EMPTY_DATA = -2;
 const REQUEST_STATE_NETWORK_ERROR = -1;
+const REQUEST_STATE_SUCCESS = 1;
 const arrow_down = require('./imageRes/arrow_down.png');
 export default class MyFlatList extends React.Component {
 
@@ -131,6 +132,11 @@ export default class MyFlatList extends React.Component {
          * 刷新完成回调
          */
         onRefreshFinish: PropTypes.func,
+        /**
+         * 自定义数据全部加载判断依据, 默认判断依据为数组长度是否小于pageSize
+         */
+        allLoadedProof: PropTypes.func,
+
     };
 
     static defaultProps = {
@@ -147,14 +153,15 @@ export default class MyFlatList extends React.Component {
     constructor(p) {
         super(p);
         //当前页码, 注意从1开始
-        this.page = REQUEST_STATE_LOADING_FIRST_PAGE;
+        this.page = 0;
         //此次请求到的数据size
         this.currentDataSize = 0;
         this.headerHeight = 0;
         this.state = {
-            isEmpty: false,//
+            isEmpty: false,
             netWorkError: false,
             isRefreshingIOS: false,
+            loadState: REQUEST_STATE_LOADING_FIRST_PAGE,
         };
 
     }
@@ -162,11 +169,13 @@ export default class MyFlatList extends React.Component {
     render() {
         if (this.state.isEmpty || this.state.netWorkError) {
             this.ultimate = null;
+            const {refreshable} = this.props;
+            const controlConfig = refreshable ? {refreshControl: this._getRefreshControl()} : {};
             return (
                 <ScrollView
-                    {... this.props}
+                    {...this.props}
                     ref={r => this.emptyScrollView = r}
-                    refreshControl={this._getRefreshControl()}
+                    {...controlConfig}
                     style={[{flex: 1}, this.props.style]}>
                     {this.props.renderHeader && this.props.renderHeader()}
                     {this._getWrongStateView()}
@@ -193,11 +202,11 @@ export default class MyFlatList extends React.Component {
                 displayDate={false}
                 arrowImageSource={arrow_down}
                 arrowImageStyle={{width: 30, height: 30}}
-
                 customRefreshViewHeight={200}
                 paginationAllLoadedView={this._getAllLoadedView}
                 paginationFetchingView={() => null}
                 {...listProps}
+                onScroll={this._onScroll}
                 item={renderItem}
                 header={this._renderHeader}
                 separator={renderSeparator}
@@ -215,6 +224,21 @@ export default class MyFlatList extends React.Component {
         </View>);
     };
 
+    /**
+     * 参数字段:
+     * animated: 是否执行动画
+     * index: The index to scroll to. 必需
+     * viewOffset: A fixed number of pixels to offset the final target position.
+     * viewPosition: A value of 0 places the item specified by index at the top, 1 at the bottom, and 0.5 centered in the middle.
+     * @param params: 见上文
+     */
+    scrollToIndex = (params) => {
+        if (!params.viewOffset) {
+            params.viewOffset = 0;
+        }
+        this.ultimate && this.ultimate.scrollToIndex(params);
+    }
+
     _getRenderScrollComponentProps = () => {
         const {renderScrollComponent} = this.props;
         if (!renderScrollComponent) {
@@ -226,6 +250,12 @@ export default class MyFlatList extends React.Component {
     };
 
     _renderHeader = () => {
+        const {loadState} = this.state;
+        if (loadState === REQUEST_STATE_LOADING_FIRST_PAGE
+            || loadState === REQUEST_STATE_NETWORK_ERROR
+            || loadState === REQUEST_STATE_EMPTY_DATA) {
+            return null;
+        }
         const {renderHeader} = this.props;
         if (!renderHeader) {
             return null;
@@ -238,7 +268,8 @@ export default class MyFlatList extends React.Component {
     };
 
     _getLoadingView = () => {
-        if (this.page !== REQUEST_STATE_LOADING_FIRST_PAGE) {
+        const {loadState} = this.state;
+        if (loadState !== REQUEST_STATE_LOADING_FIRST_PAGE) {
             return null;
         }
         let {height, width, customLoadingView} = this.props;
@@ -259,11 +290,9 @@ export default class MyFlatList extends React.Component {
     _getWrongStateView = () => {
         if (this.state.isEmpty) {
             return this._getEmptyDataView();
-        }
-        else if (this.state.netWorkError) {
+        } else if (this.state.netWorkError) {
             return this._getNetworkErrorView();
-        }
-        else {
+        } else {
             return null;
         }
     };
@@ -286,7 +315,6 @@ export default class MyFlatList extends React.Component {
             onReload={this.refresh}/>);
     };
 
-
     /**
      * 暴露方法: 滑动到指定offset距离
      * @param params 数据格式: {offset: number, animated: boolean}
@@ -296,6 +324,10 @@ export default class MyFlatList extends React.Component {
         this.emptyScrollView && this.emptyScrollView.scrollTo({x: 0, y: params.offset, animated: params.animated});
     };
 
+    scrollToEnd  = (params) => {
+        this.ultimate && this.ultimate.scrollToEnd(params);
+        this.emptyScrollView && this.emptyScrollView.scrollToEnd({params});
+    };
 
     /**
      * 暴露方法, 刷新列表数据
@@ -304,25 +336,35 @@ export default class MyFlatList extends React.Component {
      */
     refresh = (showLoader, scrollToTop = true) => {
         this.setState({isRefreshingIOS: true});
-        try {
-            scrollToTop && this.scrollToOffset({y: 0, animate: true});
-        } catch (err) {
-        }
         let {isEmpty, netWorkError} = this.state;
         //如果之前是空数据,网络请求错误状态或者要求显示loader, 那么将this.page设为 REQUEST_STATE_LOADING_FIRST_PAGE, 加载时显示loadingView
         if (isEmpty || netWorkError || showLoader) {
-            this.page = REQUEST_STATE_LOADING_FIRST_PAGE;
+            this.setState({loadState: REQUEST_STATE_LOADING_FIRST_PAGE});
         }
         this.setState({
             isEmpty: false,
             netWorkError: false,
         }, () => {
             if (scrollToTop) {
-                this.ultimate && this.ultimate.refreshAdvanced()
+                /*if (!isIos) {
+                    //安卓需要手动调用划定顶部
+                    this.scrollToOffset({y: 0, animate: true});
+                }
+                this.ultimate && this.ultimate.refresh()*/
+                this.scrollToOffset({y: 0, animated: !isIos});
+                this.ultimate && this.ultimate.refresh();
             } else {
                 this.ultimate && this.ultimate.refresh()
             }
         });
+    };
+
+    _onScroll = (nativeEvent) => {
+        let listProps = _.omit(this.props, 'style');
+        if (listProps && listProps.onScroll) {
+            listProps.onScroll(nativeEvent);
+        }
+
     };
 
     /**
@@ -331,9 +373,13 @@ export default class MyFlatList extends React.Component {
      */
     getDataList = () => {
         if (this.ultimate) {
-            return this.ultimate.getRows();
+            let rows = this.ultimate.getRows();
+            if (rows === null) {
+                rows = [];
+            }
+            return rows;
         }
-        return null;
+        return [];
     };
 
     /**
@@ -343,7 +389,7 @@ export default class MyFlatList extends React.Component {
     updateDataList = (rows) => {
         // TODO: 如果数据位空, 显示空布局
         this.ultimate && this.ultimate.updateDataSource(rows);
-        if (!ArrayUtils.isNotEmptyArray(rows)){
+        if (!ArrayUtils.isNotEmptyArray(rows)) {
             this._displayEmptyView();
         }
     };
@@ -373,8 +419,8 @@ export default class MyFlatList extends React.Component {
         this.setState({isRefreshingIOS: false});
         if (!ArrayUtils.isNotEmptyArray(data) && this.page === 1) {
             this._displayEmptyView();
-        }
-        else {
+        } else {
+            this.setState({loadState: REQUEST_STATE_SUCCESS});
             this.currentDataSize = data ? data.length : 0;
             this.startFetch(data, this.props.pageSize);
         }
@@ -383,10 +429,10 @@ export default class MyFlatList extends React.Component {
     _displayEmptyView = () => {
         this.page = 1;
         this.currentDataSize = 0;
-        this.page = REQUEST_STATE_EMPTY_DATA;
         this.setState({
             isEmpty: true,
             netWorkError: false,
+            loadState: REQUEST_STATE_EMPTY_DATA
         });
     };
 
@@ -398,13 +444,12 @@ export default class MyFlatList extends React.Component {
         this._stopSmartRefresh();
         this.setState({isRefreshingIOS: false});
         if (this.page === 1) {
-            this.page = REQUEST_STATE_NETWORK_ERROR;
             this.setState({
                 isEmpty: false,
                 netWorkError: true,
+                loadState: REQUEST_STATE_NETWORK_ERROR
             });
-        }
-        else {
+        } else {
             this.abortFetch();
         }
     };
@@ -476,7 +521,8 @@ export default class MyFlatList extends React.Component {
 class AllLoadedView extends React.Component {
     render() {
         return (<View style={[{height: 40, alignItems: 'center', justifyContent: 'center'}, this.props.style]}>
-            <TextBetweenLines text="没有更多了" textStyle={{color: '#c1c1c1', fontSize: 12,}} lineWidth={25}/>
+            <TextBetweenLines text="没有更多了" textStyle={{color: '#c1c1c1', fontSize: 12,}} lineWidth={25}
+                              style={{marginTop: 0, marginBottom: 0,}}/>
         </View>);
     }
 }

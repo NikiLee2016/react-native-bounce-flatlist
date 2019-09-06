@@ -13,7 +13,7 @@ import {
     Platform,
 } from 'react-native';
 import PropTypes from "prop-types";
-import {SmartRefreshControl, AnyHeader, DefaultHeader} from "react-native-SmartRefreshLayout";
+import {SmartRefreshControl, AnyHeader, DefaultHeader} from "react-native-smartrefreshlayout";
 // import {SmartRefreshControl, AnyHeader, DefaultHeader} from 'react-native-smartrefreshlayout';
 
 const screenWidth = Dimensions.get('window').width;
